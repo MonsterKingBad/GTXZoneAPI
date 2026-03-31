@@ -28,7 +28,6 @@ C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\staticwebassets.bui
 C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\staticwebassets.development.json
 C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\staticwebassets.build.endpoints.json
 C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\swae.build.ex.cache
-C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
 C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\GTXZone.csproj.Up2Date
 C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\GTXZone.dll
 C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\refint\GTXZone.dll
@@ -163,3 +162,6 @@ C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\runtimes\win-x86\na
 C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\BCrypt.Net-Next.dll
 C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Microsoft.AspNetCore.Authentication.JwtBearer.dll
 C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Microsoft.EntityFrameworkCore.InMemory.dll
+C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Npgsql.dll
+C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
+C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\GTXZone.sourcelink.json
