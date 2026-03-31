@@ -30,7 +30,7 @@ builder.Services.AddCors(options =>
     {
         policy.WithOrigins(
             "http://localhost:4200",
-            "https://gtxzone.netlify.app/"
+            "https://gtxzone.netlify.app"
         )
         .AllowAnyHeader()
         .AllowAnyMethod();
