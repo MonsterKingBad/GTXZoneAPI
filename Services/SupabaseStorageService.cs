@@ -14,12 +14,20 @@ namespace GTXZone.Services
             var key = configuration["Supabase:Key"];
             _bucket = configuration["Supabase:Bucket"] ?? "torrents";
 
+            if (string.IsNullOrWhiteSpace(url))
+                throw new Exception("Supabase:Url is missing.");
+
+            if (string.IsNullOrWhiteSpace(key))
+                throw new Exception("Supabase:Key is missing.");
+
             _client = new Supabase.Client(url, key);
         }
 
         private async Task EnsureInitializedAsync()
         {
-            if (_initialized) return;
+            if (_initialized)
+                return;
+
             await _client.InitializeAsync();
             _initialized = true;
         }
@@ -59,10 +67,16 @@ namespace GTXZone.Services
             if (string.IsNullOrWhiteSpace(fileUrl))
                 return;
 
+            // Skip old local paths like /Uploads/abc.torrent
+            if (!Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
+                return;
+
             await EnsureInitializedAsync();
 
-            var uri = new Uri(fileUrl);
             var fileName = Path.GetFileName(uri.AbsolutePath);
+
+            if (string.IsNullOrWhiteSpace(fileName))
+                return;
 
             await _client.Storage
                 .From(_bucket)

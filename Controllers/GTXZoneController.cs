@@ -14,9 +14,7 @@ namespace GTXZone.Controllers
         private readonly AppDbContext _context;
         private readonly SupabaseStorageService _storageService;
 
-        public GamesController(
-            AppDbContext context,
-            SupabaseStorageService storageService)
+        public GamesController(AppDbContext context, SupabaseStorageService storageService)
         {
             _context = context;
             _storageService = storageService;
@@ -57,29 +55,41 @@ namespace GTXZone.Controllers
         [RequestSizeLimit(1024L * 1024L * 1024L)]
         public async Task<IActionResult> Create([FromForm] GameCreateDto dto)
         {
-            if (string.IsNullOrWhiteSpace(dto.Title))
-                return BadRequest(new { message = "Title is required" });
-
-            string? fileUrl = null;
-
-            if (dto.File != null && dto.File.Length > 0)
+            try
             {
-                fileUrl = await _storageService.UploadFileAsync(dto.File);
+                if (string.IsNullOrWhiteSpace(dto.Title))
+                    return BadRequest(new { message = "Title is required" });
+
+                string? fileUrl = null;
+
+                if (dto.File != null && dto.File.Length > 0)
+                {
+                    fileUrl = await _storageService.UploadFileAsync(dto.File);
+                }
+
+                var game = new Game
+                {
+                    Title = dto.Title.Trim(),
+                    Description = dto.Description,
+                    Genre = dto.Genre,
+                    ImageUrl = dto.ImageUrl,
+                    FilePath = fileUrl
+                };
+
+                _context.Games.Add(game);
+                await _context.SaveChangesAsync();
+
+                return Ok(game);
             }
-
-            var game = new Game
+            catch (Exception ex)
             {
-                Title = dto.Title.Trim(),
-                Description = dto.Description,
-                Genre = dto.Genre,
-                ImageUrl = dto.ImageUrl,
-                FilePath = fileUrl
-            };
-
-            _context.Games.Add(game);
-            await _context.SaveChangesAsync();
-
-            return Ok(game);
+                return StatusCode(500, new
+                {
+                    message = "Create failed",
+                    error = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
+            }
         }
 
         [Authorize(Roles = "Admin")]
@@ -87,48 +97,72 @@ namespace GTXZone.Controllers
         [RequestSizeLimit(1024L * 1024L * 1024L)]
         public async Task<IActionResult> Update(int id, [FromForm] GameUpdateDto dto)
         {
-            var game = await _context.Games.FindAsync(id);
-
-            if (game == null)
-                return NotFound(new { message = "Game not found" });
-
-            game.Title = dto.Title?.Trim() ?? game.Title;
-            game.Description = dto.Description;
-            game.Genre = dto.Genre;
-            game.ImageUrl = dto.ImageUrl;
-
-            if (dto.File != null && dto.File.Length > 0)
+            try
             {
-                if (!string.IsNullOrWhiteSpace(game.FilePath))
+                var game = await _context.Games.FindAsync(id);
+
+                if (game == null)
+                    return NotFound(new { message = "Game not found" });
+
+                game.Title = dto.Title?.Trim() ?? game.Title;
+                game.Description = dto.Description;
+                game.Genre = dto.Genre;
+                game.ImageUrl = dto.ImageUrl;
+
+                if (dto.File != null && dto.File.Length > 0)
                 {
-                    await _storageService.DeleteFileAsync(game.FilePath);
+                    if (!string.IsNullOrWhiteSpace(game.FilePath))
+                    {
+                        await _storageService.DeleteFileAsync(game.FilePath);
+                    }
+
+                    game.FilePath = await _storageService.UploadFileAsync(dto.File);
                 }
 
-                game.FilePath = await _storageService.UploadFileAsync(dto.File);
+                await _context.SaveChangesAsync();
+                return Ok(game);
             }
-
-            await _context.SaveChangesAsync();
-            return Ok(game);
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Update failed",
+                    error = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
+            }
         }
 
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
         {
-            var game = await _context.Games.FindAsync(id);
-
-            if (game == null)
-                return NotFound(new { message = "Game not found" });
-
-            if (!string.IsNullOrWhiteSpace(game.FilePath))
+            try
             {
-                await _storageService.DeleteFileAsync(game.FilePath);
+                var game = await _context.Games.FindAsync(id);
+
+                if (game == null)
+                    return NotFound(new { message = "Game not found" });
+
+                if (!string.IsNullOrWhiteSpace(game.FilePath))
+                {
+                    await _storageService.DeleteFileAsync(game.FilePath);
+                }
+
+                _context.Games.Remove(game);
+                await _context.SaveChangesAsync();
+
+                return NoContent();
             }
-
-            _context.Games.Remove(game);
-            await _context.SaveChangesAsync();
-
-            return NoContent();
+            catch (Exception ex)
+            {
+                return StatusCode(500, new
+                {
+                    message = "Delete failed",
+                    error = ex.Message,
+                    inner = ex.InnerException?.Message
+                });
+            }
         }
     }
 }

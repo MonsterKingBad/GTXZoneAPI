@@ -177,3 +177,4 @@ C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Supabase.Storage.dl
 C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\System.Reactive.dll
 C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Websocket.Client.dll
 C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\GTXZone.staticwebassets.runtime.json
+C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt

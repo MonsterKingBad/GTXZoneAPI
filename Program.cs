@@ -2,9 +2,7 @@ using GTXZone.Data;
 using GTXZone.Models;
 using GTXZone.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
-using Microsoft.AspNetCore.StaticFiles;
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.FileProviders;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -15,7 +13,6 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddOpenApi();
-builder.Services.AddScoped<SupabaseStorageService>();
 
 // PostgreSQL database
 builder.Services.AddDbContext<AppDbContext>(options =>
@@ -23,8 +20,9 @@ builder.Services.AddDbContext<AppDbContext>(options =>
         builder.Configuration.GetConnectionString("DefaultConnection")
     ));
 
-// JWT service
+// Services
 builder.Services.AddScoped<JwtService>();
+builder.Services.AddScoped<SupabaseStorageService>();
 
 // CORS
 builder.Services.AddCors(options =>
@@ -66,21 +64,6 @@ var app = builder.Build();
 app.UseSwagger();
 app.UseSwaggerUI();
 
-// Uploads path
-// Render persistent disk example: /var/data/Uploads
-// Local fallback: wwwroot/Uploads
-var uploadsPath = builder.Configuration["Uploads:RootPath"];
-
-if (string.IsNullOrWhiteSpace(uploadsPath))
-{
-    uploadsPath = Path.Combine(app.Environment.ContentRootPath, "wwwroot", "Uploads");
-}
-
-if (!Directory.Exists(uploadsPath))
-{
-    Directory.CreateDirectory(uploadsPath);
-}
-
 // Apply migrations and seed admin user
 using (var scope = app.Services.CreateScope())
 {
@@ -102,20 +85,6 @@ using (var scope = app.Services.CreateScope())
 }
 
 app.UseHttpsRedirection();
-
-// Serve default static files from wwwroot
-app.UseStaticFiles();
-
-// Serve files from Uploads folder
-var contentTypeProvider = new FileExtensionContentTypeProvider();
-contentTypeProvider.Mappings[".torrent"] = "application/x-bittorrent";
-
-app.UseStaticFiles(new StaticFileOptions
-{
-    FileProvider = new PhysicalFileProvider(uploadsPath),
-    RequestPath = "/Uploads",
-    ContentTypeProvider = contentTypeProvider
-});
 
 app.UseCors("AllowAngular");
 
