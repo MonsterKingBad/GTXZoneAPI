@@ -165,3 +165,4 @@ C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Microsoft.EntityFra
 C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Npgsql.dll
 C:\Users\user\source\repos\GTXZone\GTXZone\bin\Debug\net10.0\Npgsql.EntityFrameworkCore.PostgreSQL.dll
 C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\GTXZone.sourcelink.json
+C:\Users\user\source\repos\GTXZone\GTXZone\obj\Debug\net10.0\staticwebassets.upToDateCheck.txt
