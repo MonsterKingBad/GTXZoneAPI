@@ -67,7 +67,7 @@ namespace GTXZone.Services
             if (string.IsNullOrWhiteSpace(fileUrl))
                 return;
 
-            // Skip old local paths like /Uploads/abc.torrent
+            // THIS LINE FIXES YOUR CRASH
             if (!Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
                 return;
 
