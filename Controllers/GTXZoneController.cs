@@ -99,31 +99,50 @@ namespace GTXZone.Controllers
         {
             try
             {
+                Console.WriteLine($"[UPDATE] Start update for game id={id}");
+
                 var game = await _context.Games.FindAsync(id);
 
                 if (game == null)
                     return NotFound(new { message = "Game not found" });
+
+                Console.WriteLine($"[UPDATE] Game found. Current FilePath={game.FilePath}");
 
                 game.Title = dto.Title?.Trim() ?? game.Title;
                 game.Description = dto.Description;
                 game.Genre = dto.Genre;
                 game.ImageUrl = dto.ImageUrl;
 
+                Console.WriteLine("[UPDATE] Basic fields updated");
+
                 if (dto.File != null && dto.File.Length > 0)
                 {
+                    Console.WriteLine($"[UPDATE] New file detected: {dto.File.FileName}, size={dto.File.Length}");
+
                     if (!string.IsNullOrWhiteSpace(game.FilePath))
                     {
+                        Console.WriteLine($"[UPDATE] Deleting old file: {game.FilePath}");
                         await _storageService.DeleteFileAsync(game.FilePath);
+                        Console.WriteLine("[UPDATE] Old file delete finished");
                     }
 
+                    Console.WriteLine("[UPDATE] Uploading new file to Supabase");
                     game.FilePath = await _storageService.UploadFileAsync(dto.File);
+                    Console.WriteLine($"[UPDATE] Upload finished. New FilePath={game.FilePath}");
+                }
+                else
+                {
+                    Console.WriteLine("[UPDATE] No file uploaded");
                 }
 
                 await _context.SaveChangesAsync();
+                Console.WriteLine("[UPDATE] SaveChanges finished");
+
                 return Ok(game);
             }
             catch (Exception ex)
             {
+                Console.WriteLine($"[UPDATE ERROR] {ex}");
                 return StatusCode(500, new
                 {
                     message = "Update failed",
