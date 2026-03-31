@@ -28,9 +28,12 @@ builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAngular", policy =>
     {
-        policy.WithOrigins("http://localhost:4200")
-              .AllowAnyHeader()
-              .AllowAnyMethod();
+        policy.WithOrigins(
+            "http://localhost:4200",
+            "https://gtxzone.netlify.app/"
+        )
+        .AllowAnyHeader()
+        .AllowAnyMethod();
     });
 });
 
@@ -53,6 +56,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
 builder.Services.AddAuthorization();
 
 var app = builder.Build();
+
+// Optional: enable swagger in production too
+app.UseSwagger();
+app.UseSwaggerUI();
 
 // Create Uploads folder if it doesn't exist
 var uploadsPath = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
@@ -79,19 +86,10 @@ using (var scope = app.Services.CreateScope())
     }
 }
 
-// Middleware pipeline
-if (app.Environment.IsDevelopment())
-{
-    app.UseSwagger();
-    app.UseSwaggerUI();
-}
-
 app.UseHttpsRedirection();
 
-// Default static files (wwwroot)
 app.UseStaticFiles();
 
-// Serve files from Uploads folder
 var contentTypeProvider = new FileExtensionContentTypeProvider();
 contentTypeProvider.Mappings[".torrent"] = "application/x-bittorrent";
 
