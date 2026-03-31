@@ -1,5 +1,6 @@
 ﻿using GTXZone.Data;
 using GTXZone.Models;
+using GTXZone.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -11,14 +12,16 @@ namespace GTXZone.Controllers
     public class GamesController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly SupabaseStorageService _storageService;
 
-        public GamesController(AppDbContext context)
+        public GamesController(
+            AppDbContext context,
+            SupabaseStorageService storageService)
         {
             _context = context;
+            _storageService = storageService;
         }
 
-        // GET: api/games
-        // GET: api/games?search=gta
         [HttpGet]
         public async Task<IActionResult> GetAll([FromQuery] string? search)
         {
@@ -34,11 +37,10 @@ namespace GTXZone.Controllers
                     g.Description.Contains(search));
             }
 
-            var games = await query.ToListAsync();
+            var games = await query.OrderByDescending(g => g.Id).ToListAsync();
             return Ok(games);
         }
 
-        // GET: api/games/5
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(int id)
         {
@@ -50,41 +52,28 @@ namespace GTXZone.Controllers
             return Ok(game);
         }
 
-        // POST: api/games
         [Authorize(Roles = "Admin")]
         [HttpPost]
+        [RequestSizeLimit(1024L * 1024L * 1024L)]
         public async Task<IActionResult> Create([FromForm] GameCreateDto dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Title))
-                return BadRequest("Title is required");
+                return BadRequest(new { message = "Title is required" });
 
-            string? filePath = null;
+            string? fileUrl = null;
 
-            if (dto.File != null)
+            if (dto.File != null && dto.File.Length > 0)
             {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
-
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = Guid.NewGuid() + Path.GetExtension(dto.File.FileName);
-                var fullPath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(fullPath, FileMode.Create))
-                {
-                    await dto.File.CopyToAsync(stream);
-                }
-
-                filePath = "/Uploads/" + fileName;
+                fileUrl = await _storageService.UploadFileAsync(dto.File);
             }
 
             var game = new Game
             {
-                Title = dto.Title,
+                Title = dto.Title.Trim(),
                 Description = dto.Description,
                 Genre = dto.Genre,
                 ImageUrl = dto.ImageUrl,
-                FilePath = filePath
+                FilePath = fileUrl
             };
 
             _context.Games.Add(game);
@@ -93,54 +82,35 @@ namespace GTXZone.Controllers
             return Ok(game);
         }
 
-        // PUT: api/games/5
         [Authorize(Roles = "Admin")]
         [HttpPut("{id}")]
+        [RequestSizeLimit(1024L * 1024L * 1024L)]
         public async Task<IActionResult> Update(int id, [FromForm] GameUpdateDto dto)
         {
             var game = await _context.Games.FindAsync(id);
-            if (game == null)
-                return NotFound("Game not found");
 
-            game.Title = dto.Title;
+            if (game == null)
+                return NotFound(new { message = "Game not found" });
+
+            game.Title = dto.Title?.Trim() ?? game.Title;
             game.Description = dto.Description;
             game.Genre = dto.Genre;
             game.ImageUrl = dto.ImageUrl;
 
-            // remove file
-            if (dto.RemoveFile && game.FilePath != null)
+            if (dto.File != null && dto.File.Length > 0)
             {
-                var oldPath = Path.Combine(Directory.GetCurrentDirectory(), game.FilePath.TrimStart('/'));
-                if (System.IO.File.Exists(oldPath))
-                    System.IO.File.Delete(oldPath);
-
-                game.FilePath = null;
-            }
-
-            // upload new file
-            if (dto.File != null)
-            {
-                var uploadsFolder = Path.Combine(Directory.GetCurrentDirectory(), "Uploads");
-
-                if (!Directory.Exists(uploadsFolder))
-                    Directory.CreateDirectory(uploadsFolder);
-
-                var fileName = Guid.NewGuid() + Path.GetExtension(dto.File.FileName);
-                var fullPath = Path.Combine(uploadsFolder, fileName);
-
-                using (var stream = new FileStream(fullPath, FileMode.Create))
+                if (!string.IsNullOrWhiteSpace(game.FilePath))
                 {
-                    await dto.File.CopyToAsync(stream);
+                    await _storageService.DeleteFileAsync(game.FilePath);
                 }
 
-                game.FilePath = "/Uploads/" + fileName;
+                game.FilePath = await _storageService.UploadFileAsync(dto.File);
             }
 
             await _context.SaveChangesAsync();
             return Ok(game);
         }
 
-        // DELETE: api/games/5
         [Authorize(Roles = "Admin")]
         [HttpDelete("{id}")]
         public async Task<IActionResult> Delete(int id)
@@ -149,6 +119,11 @@ namespace GTXZone.Controllers
 
             if (game == null)
                 return NotFound(new { message = "Game not found" });
+
+            if (!string.IsNullOrWhiteSpace(game.FilePath))
+            {
+                await _storageService.DeleteFileAsync(game.FilePath);
+            }
 
             _context.Games.Remove(game);
             await _context.SaveChangesAsync();
