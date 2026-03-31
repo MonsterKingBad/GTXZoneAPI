@@ -14,7 +14,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("GTXZone")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+7d0cf5cad7b091a75ede3689c6cfefbcd11c74c2")]
 [assembly: System.Reflection.AssemblyProductAttribute("GTXZone")]
 [assembly: System.Reflection.AssemblyTitleAttribute("GTXZone")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]
