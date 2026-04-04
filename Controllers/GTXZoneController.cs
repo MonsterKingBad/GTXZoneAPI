@@ -21,7 +21,7 @@ namespace GTXZone.Controllers
         }
 
         [HttpGet]
-        public async Task<IActionResult> GetAll([FromQuery] string? search)
+        public async Task<IActionResult> GetAll([FromQuery] string? search, [FromQuery] string? category)
         {
             var query = _context.Games.AsQueryable();
 
@@ -32,7 +32,17 @@ namespace GTXZone.Controllers
                 query = query.Where(g =>
                     g.Title.Contains(search) ||
                     g.Genre.Contains(search) ||
-                    g.Description.Contains(search));
+                    g.Description.Contains(search) ||
+                    (g.Category != null && g.Category.Contains(search)));
+            }
+
+            if (!string.IsNullOrWhiteSpace(category))
+            {
+                category = category.Trim();
+
+                query = query.Where(g =>
+                    g.Category != null &&
+                    g.Category.ToLower() == category.ToLower());
             }
 
             var games = await query.OrderByDescending(g => g.Id).ToListAsync();
@@ -60,6 +70,9 @@ namespace GTXZone.Controllers
                 if (string.IsNullOrWhiteSpace(dto.Title))
                     return BadRequest(new { message = "Title is required" });
 
+                if (string.IsNullOrWhiteSpace(dto.Category))
+                    return BadRequest(new { message = "Category is required" });
+
                 string? fileUrl = null;
 
                 if (dto.File != null && dto.File.Length > 0)
@@ -72,6 +85,7 @@ namespace GTXZone.Controllers
                     Title = dto.Title.Trim(),
                     Description = dto.Description,
                     Genre = dto.Genre,
+                    Category = dto.Category.Trim(),
                     ImageUrl = dto.ImageUrl,
                     FilePath = fileUrl
                 };
@@ -108,10 +122,15 @@ namespace GTXZone.Controllers
 
                 Console.WriteLine($"[UPDATE] Game found. Current FilePath={game.FilePath}");
 
-                game.Title = dto.Title?.Trim() ?? game.Title;
+                if (!string.IsNullOrWhiteSpace(dto.Title))
+                    game.Title = dto.Title.Trim();
+
                 game.Description = dto.Description;
                 game.Genre = dto.Genre;
                 game.ImageUrl = dto.ImageUrl;
+
+                if (!string.IsNullOrWhiteSpace(dto.Category))
+                    game.Category = dto.Category.Trim();
 
                 Console.WriteLine("[UPDATE] Basic fields updated");
 

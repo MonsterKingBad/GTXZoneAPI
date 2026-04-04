@@ -48,6 +48,13 @@
             "schema": {
               "type": "string"
             }
+          },
+          {
+            "name": "category",
+            "in": "query",
+            "schema": {
+              "type": "string"
+            }
           }
         ],
         "responses": {
@@ -78,6 +85,9 @@
                   "ImageUrl": {
                     "type": "string"
                   },
+                  "Category": {
+                    "type": "string"
+                  },
                   "File": {
                     "type": "string",
                     "format": "binary"
@@ -95,6 +105,9 @@
                   "style": "form"
                 },
                 "ImageUrl": {
+                  "style": "form"
+                },
+                "Category": {
                   "style": "form"
                 },
                 "File": {
@@ -166,12 +179,12 @@
                   "ImageUrl": {
                     "type": "string"
                   },
+                  "Category": {
+                    "type": "string"
+                  },
                   "File": {
                     "type": "string",
                     "format": "binary"
-                  },
-                  "RemoveFile": {
-                    "type": "boolean"
                   }
                 }
               },
@@ -188,10 +201,10 @@
                 "ImageUrl": {
                   "style": "form"
                 },
-                "File": {
+                "Category": {
                   "style": "form"
                 },
-                "RemoveFile": {
+                "File": {
                   "style": "form"
                 }
               }

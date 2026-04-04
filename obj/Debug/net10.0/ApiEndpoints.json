@@ -27,6 +27,11 @@
         "Name": "search",
         "Type": "System.String",
         "IsRequired": false
+      },
+      {
+        "Name": "category",
+        "Type": "System.String",
+        "IsRequired": false
       }
     ],
     "ReturnTypes": []
@@ -56,6 +61,11 @@
       },
       {
         "Name": "ImageUrl",
+        "Type": "System.String",
+        "IsRequired": false
+      },
+      {
+        "Name": "Category",
         "Type": "System.String",
         "IsRequired": false
       },
@@ -117,13 +127,13 @@
         "IsRequired": false
       },
       {
-        "Name": "File",
-        "Type": "Microsoft.AspNetCore.Http.IFormFile",
+        "Name": "Category",
+        "Type": "System.String",
         "IsRequired": false
       },
       {
-        "Name": "RemoveFile",
-        "Type": "System.Boolean",
+        "Name": "File",
+        "Type": "Microsoft.AspNetCore.Http.IFormFile",
         "IsRequired": false
       }
     ],

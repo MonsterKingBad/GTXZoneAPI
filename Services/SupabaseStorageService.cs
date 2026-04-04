@@ -47,13 +47,25 @@ namespace GTXZone.Services
 
             try
             {
+                Console.WriteLine($"[SUPABASE] Bucket = {_bucket}");
+                Console.WriteLine($"[SUPABASE] Uploading file = {fileName}");
+
                 await _client.Storage
                     .From(_bucket)
                     .Upload(tempPath, fileName);
 
-                return _client.Storage
+                var publicUrl = _client.Storage
                     .From(_bucket)
                     .GetPublicUrl(fileName);
+
+                Console.WriteLine($"[SUPABASE] Uploaded URL = {publicUrl}");
+
+                return publicUrl;
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SUPABASE UPLOAD ERROR] {ex}");
+                throw new Exception($"Supabase upload failed: {ex.Message}");
             }
             finally
             {
@@ -64,23 +76,29 @@ namespace GTXZone.Services
 
         public async Task DeleteFileAsync(string? fileUrl)
         {
-            if (string.IsNullOrWhiteSpace(fileUrl))
-                return;
+            try
+            {
+                if (string.IsNullOrWhiteSpace(fileUrl))
+                    return;
 
-            // THIS LINE FIXES YOUR CRASH
-            if (!Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
-                return;
+                if (!Uri.TryCreate(fileUrl, UriKind.Absolute, out var uri))
+                    return;
 
-            await EnsureInitializedAsync();
+                await EnsureInitializedAsync();
 
-            var fileName = Path.GetFileName(uri.AbsolutePath);
+                var fileName = Path.GetFileName(uri.AbsolutePath);
 
-            if (string.IsNullOrWhiteSpace(fileName))
-                return;
+                if (string.IsNullOrWhiteSpace(fileName))
+                    return;
 
-            await _client.Storage
-                .From(_bucket)
-                .Remove(new List<string> { fileName });
+                await _client.Storage
+                    .From(_bucket)
+                    .Remove(new List<string> { fileName });
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"[SUPABASE DELETE ERROR] {ex}");
+            }
         }
     }
 }

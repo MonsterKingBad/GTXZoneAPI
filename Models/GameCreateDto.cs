@@ -6,6 +6,7 @@
         public string Description { get; set; } = string.Empty;
         public string Genre { get; set; } = string.Empty;
         public string ImageUrl { get; set; } = string.Empty;
+        public string Category { get; set; }
         public IFormFile? File { get; set; }
     }
 }
