@@ -27,22 +27,24 @@ namespace GTXZone.Controllers
 
             if (!string.IsNullOrWhiteSpace(search))
             {
-                search = search.Trim();
+                var lowerSearch = search.Trim().ToLower();
 
                 query = query.Where(g =>
-                    g.Title.Contains(search) ||
-                    g.Genre.Contains(search) ||
-                    g.Description.Contains(search) ||
-                    (g.Category != null && g.Category.Contains(search)));
+                    g.Title.ToLower().Contains(lowerSearch) ||
+                    g.Genre.ToLower().Contains(lowerSearch) ||
+                    g.Description.ToLower().Contains(lowerSearch) ||
+                    (g.Category != null && g.Category.ToLower().Contains(lowerSearch))
+                );
             }
 
             if (!string.IsNullOrWhiteSpace(category))
             {
-                category = category.Trim();
+                var lowerCategory = category.Trim().ToLower();
 
                 query = query.Where(g =>
                     g.Category != null &&
-                    g.Category.ToLower() == category.ToLower());
+                    g.Category.ToLower().Trim() == lowerCategory
+                );
             }
 
             var games = await query.OrderByDescending(g => g.Id).ToListAsync();
